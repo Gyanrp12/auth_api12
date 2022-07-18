@@ -48,8 +48,10 @@ class LoginView(APIView):
                      
                         response = Response()
                         response.set_cookie(key='jwt', value=token)
+                        response.set_cookie(key='id', value=user.id)
                         response.data = {
-                            'jwt': token
+                            'jwt': token,
+                
                        
                     
                         } 
@@ -67,8 +69,10 @@ class UserView(APIView):
    
     def get(self, request):
         try:
-            if request.COOKIES['jwt']  is not None:
-                ser = UserSerializer(request.user)
+            print("+++++++++++++++++",request.COOKIES['id'])
+            if request.COOKIES['id']  is not None:
+                usr = User.objects.get(id=request.COOKIES['id'])
+                ser = UserSerializer(usr)
                 return Response(ser.data)
                
             else:
@@ -87,8 +91,11 @@ class UserView(APIView):
 class LogoutView(APIView):
     def post(self, request):
         response = Response()
+        response.delete_cookie('id')
         response.delete_cookie('jwt')
         response.data={
             'msg':'logout'
-         }
+            
+ }
+
         return response
