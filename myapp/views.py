@@ -69,7 +69,6 @@ class UserView(APIView):
    
     def get(self, request):
         try:
-            print("+++++++++++++++++",request.COOKIES['id'])
             if request.COOKIES['id']  is not None:
                 usr = User.objects.get(id=request.COOKIES['id'])
                 ser = UserSerializer(usr)
