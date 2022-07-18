@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import render
 
 from django.shortcuts import render
@@ -17,10 +18,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 def get_tokens_for_user(user):
     refresh = RefreshToken.for_user(user)
-
     return {
         'refresh': str(refresh),
-        'access': str(refresh.access_token),
+        'access':str(refresh.access_token),
     }
  
 class RegisterView(APIView):
@@ -35,38 +35,34 @@ class LoginView(APIView):
     def post(self,request):
         email = request.data['email']
         password = request.data['password']
-        # print("-----------------------------",email)
-        
-        # usr = User.objects.get(email=email)
-        # print(usr.password)
-        user = authenticate(email=email,password=password)
-        print("----------------",password)
-        if user is not None :
-            token = get_tokens_for_user(user)
-            print("+++++++++++++++",token)
-            response = Response()
-            response.set_cookie(key='jwt', value=token)
-            response.data = {
-                'jwt': token
-           
-            }
-            print("+++++++++++++++",token)
-            return response
-        return Response({'msg':"errors"})
+
+        try:
+                usr = User.objects.get(email=email)
+                try:
+                    user = authenticate(email=email,password=password)
+                    if user is not None :
+                        token = get_tokens_for_user(usr)
+                     
+                        response = Response()
+                        response.set_cookie(key='jwt', value=token)
+                        response.data = {
+                            'jwt': token
+                    
+                        }
+                 
+                        return response
+                except:
+                    return Response({'msg':"errors"})
+        except:
+                return Response({'msg':"email is invalid"})
 
 class UserView(APIView):
-    # permissions_classes = [IsAuthenticated]
+    permissions_classes = [IsAuthenticated]
     def get(self, request):
-        token = request.COOKIES.get('jwt')
-        print("++++++++++++++++++",token)
-        if not token:
-            return Response({'msg':'error'})
-        else:
-            payload = jwt.decode(token,'secret',algorithms=['HS256'])
-            user = User.objects.filter(id=payload['id']).first()
-            ser = UserSerializer(user)
-
-            return Response(ser.data)    
+         ser = UserSerializer(request.user)
+        
+         return Response(ser.data)
+    
     
 class LogoutView(APIView):
     def post(self, request):
@@ -74,8 +70,8 @@ class LogoutView(APIView):
         response = Response()
         response.delete_cookie('jwt')
         response.data={
-            'msg':'Success'
+            'msg':'logout'
             
         }
-        print("+++++++++++++++++++++++++++")
+
         return response
