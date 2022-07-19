@@ -10,7 +10,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from .serializers import UserSerializer
 from .models import User
 import jwt,datetime
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate     
 from rest_framework.permissions import IsAuthenticated 
 from rest_framework_jwt.utils import jwt_decode_handler
 
@@ -98,8 +98,6 @@ class LogoutView(APIView):
  }
 
         return response
-    
-    
 class DeleteView(APIView):
     def delete(self, request):
        if request.COOKIES['id']  is not None:
@@ -117,14 +115,13 @@ class UpdateView(APIView):
                     ser.save()
                     return Response({'msg':"updated"})
             except:
-                return Response({'msg':"please first login"})
+                return Response({'msg':"something wrong"})
             
 class AlluserView(APIView):
     def get(self, request):
         try:
-            if request.COOKIES['jwt']is not None:
+            if request.COOKIES['id']is not None:
                 usr = User.objects.all()
-                print("-----------------------------",usr)
                 ser = UserSerializer(usr,many=True)
                 return Response(ser.data)
             
@@ -132,3 +129,4 @@ class AlluserView(APIView):
                 return Response(ser.errors)
         except:
             return Response({"msg":"token is invalid"})
+

@@ -3,6 +3,8 @@ from rest_framework import serializers
 
 
 class UserSerializer(serializers.ModelSerializer):
+    
+    #For hide the password
     password = serializers.CharField( 
            style={'input_type': 'password'},
            min_length=6, 
@@ -12,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id','username','email','password']
         
-        #For hide the password
+        
     
 
     #password hassing
