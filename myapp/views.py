@@ -36,7 +36,7 @@ class RegisterView(APIView):
 class LoginView(APIView):
     def post(self,request):
         # ser = UserSerializer(data=request.data)
-        # ser.is_valid(raise_exception=True)
+        # ser.is_valid()
         # email = request.data['email']
         # password = request.data['password']
         try:
@@ -48,7 +48,7 @@ class LoginView(APIView):
                      
                         response = Response()
                         response.set_cookie(key='jwt', value=token)
-                        response.set_cookie(key='id', value=user.id)
+                        response.set_cookie(key='id', value=user.id,expires = settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'])
                         response.data = {
                             'jwt': token,
                 
@@ -69,7 +69,6 @@ class UserView(APIView):
    
     def get(self, request):
         try:
-            print("+++++++++++++++++",request.COOKIES['id'])
             if request.COOKIES['id']  is not None:
                 usr = User.objects.get(id=request.COOKIES['id'])
                 ser = UserSerializer(usr)
@@ -99,3 +98,37 @@ class LogoutView(APIView):
  }
 
         return response
+    
+    
+class DeleteView(APIView):
+    def delete(self, request):
+       if request.COOKIES['id']  is not None:
+        usr = User.objects.get(id=request.COOKIES['id'])
+        usr.delete()
+        return Response({"msg":"deleted"})
+
+class UpdateView(APIView):
+        def put(self, request):
+            try:
+                if request.COOKIES['id'] is not None:
+                    usr = User.objects.get(id=request.COOKIES['id'])
+                    ser = UserSerializer(usr,data=request.data,partial=True)
+                    ser .is_valid(raise_exception=True)
+                    ser.save()
+                    return Response({'msg':"updated"})
+            except:
+                return Response({'msg':"please first login"})
+            
+class AlluserView(APIView):
+    def get(self, request):
+        try:
+            if request.COOKIES['jwt']is not None:
+                usr = User.objects.all()
+                print("-----------------------------",usr)
+                ser = UserSerializer(usr,many=True)
+                return Response(ser.data)
+            
+            else:
+                return Response(ser.errors)
+        except:
+            return Response({"msg":"token is invalid"})
