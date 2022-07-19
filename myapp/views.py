@@ -1,7 +1,5 @@
 from django.conf import settings
 from django.shortcuts import render
-
-from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
@@ -115,15 +113,17 @@ class UpdateView(APIView):
                     ser.save()
                     return Response({'msg':"updated"})
             except:
-                return Response({'msg':"something wrong"})
+                return Response({'msg':"something  wrong"})
             
 class AlluserView(APIView):
     def get(self, request):
         try:
             if request.COOKIES['id']is not None:
-                usr = User.objects.all()
-                ser = UserSerializer(usr,many=True)
-                return Response(ser.data)
+                user = User.objects.get(id=request.COOKIES['id'])
+                if user is not None:
+                    usr = User.objects.all()
+                    ser = UserSerializer(usr,many=True)
+                    return Response(ser.data)                
             
             else:
                 return Response(ser.errors)
